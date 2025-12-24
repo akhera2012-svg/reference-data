@@ -1,0 +1,4 @@
+com\example\mrd\repository\SecurityRepository.class
+com\example\mrd\service\CsvImporter.class
+com\example\mrd\entity\SecurityData.class
+com\example\mrd\ReferenceDataApplication.class

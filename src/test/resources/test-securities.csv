@@ -1,0 +1,5 @@
+ISIN,Issue_Date,Ticker,Currency,Country,Security_Desc,Security_Type
+ISIN123,2020-01-01,AAA,USD,US,Desc1,TypeA
+ISIN123,2020-01-01,AAA,USD,US,Desc1,TypeA
+ISIN123,2020-01-01,AAA,USD,US,Desc1-mod,TypeA
+ISIN456,2021-02-02,BBB,EUR,FR,Desc2,TypeB
