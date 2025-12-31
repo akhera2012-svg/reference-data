@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ public class SecurityController {
 
     @Autowired
     private SecurityRepository securityRepository;
+
+    private static final LocalDateTime ETERNITY = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
 
     /**
      * Get all securities or securities by ISIN if provided
@@ -27,9 +30,9 @@ public class SecurityController {
         List<SecurityData> securities;
 
         if (isin != null && !isin.isEmpty()) {
-            securities = securityRepository.findByIsin(isin);
+            securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
         } else {
-            securities = securityRepository.findAll();
+            securities = securityRepository.findByToDate(ETERNITY);
         }
 
         if (securities.isEmpty()) {
@@ -60,7 +63,7 @@ public class SecurityController {
      */
     @GetMapping("/isin/{isin}")
     public ResponseEntity<List<SecurityData>> getSecuritiesByIsin(@PathVariable String isin) {
-        List<SecurityData> securities = securityRepository.findByIsin(isin);
+        List<SecurityData> securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
 
         if (securities.isEmpty()) {
             return ResponseEntity.noContent().build();
