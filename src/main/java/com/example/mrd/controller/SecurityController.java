@@ -96,31 +96,4 @@ public class SecurityController {
         return security.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-    /**
-     * Get all securities with a specific ISIN
-     * 
-     * @param isin            The ISIN identifier
-     * @param includeInactive If true, returns all records (active and inactive).
-     *                        Default is false (active only)
-     * @return List of securities with matching ISIN
-     */
-    @GetMapping("/isin/{isin}")
-    public ResponseEntity<List<SecurityData>> getSecuritiesByIsin(
-            @PathVariable String isin,
-            @RequestParam(defaultValue = "false") boolean includeInactive) {
-        List<SecurityData> securities;
-
-        if (includeInactive) {
-            securities = securityRepository.findByIsin(isin);
-        } else {
-            securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
-        }
-
-        if (securities.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(securities);
-    }
 }
