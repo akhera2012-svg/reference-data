@@ -8,6 +8,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDate;
@@ -36,8 +37,12 @@ public class CsvImporter {
 
     @Transactional
     public void importCsv(String path) {
+        System.out.println("!!! Importing CSV from path: " + path);
         try {
             Resource resource;
+            System.out.println("!!!!! Index of back slash - " + path.indexOf("\\"));
+            // Use String.replace to avoid regex interpretation of backslash
+            System.out.println("!!! Importing CSV from modified path: " + path);
             if (path.startsWith("classpath:")) {
                 resource = resourceLoader.getResource(path);
             } else {

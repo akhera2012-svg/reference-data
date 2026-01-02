@@ -33,4 +33,9 @@ public class ImporterIntegrationTest {
         long total = repo.count();
         assertThat(total).isEqualTo(3);
     }
+
+    @Test
+    void deleteRepo() {
+        repo.deleteAll();
+    }
 }
