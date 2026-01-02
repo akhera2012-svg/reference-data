@@ -50,6 +50,10 @@ public class CsvDirectoryWatcher {
     private void importExistingCsvs(Path dir) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.csv")) {
             for (Path entry : stream) {
+                // Skip files that have already been processed (ending with .csv.done)
+                if (entry.toString().endsWith(".csv.done")) {
+                    continue;
+                }
                 try {
                     importer.importCsv(entry.toAbsolutePath().toString());
                 } catch (Exception ex) {

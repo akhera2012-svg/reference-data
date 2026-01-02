@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -107,6 +110,10 @@ public class CsvImporter {
                 repository.saveAll(batch);
                 System.out.println("Imported " + batch.size() + " new rows into DB.");
             }
+            // Rename the file to .done after successful import
+            // Move this outside try-with-resources to ensure file handle is released on
+            // Windows
+            renameFileToProcessed(path);
         } catch (Exception e) {
             System.err.println("Failed to import CSV: " + e.getMessage());
             e.printStackTrace();
@@ -195,5 +202,48 @@ public class CsvImporter {
             }
         }
         return null;
+    }
+
+    private void renameFileToProcessed(String filePath) {
+        try {
+            // Extract actual file path from "file:" prefix if present
+            String actualPath = filePath;
+            if (filePath.startsWith("file:")) {
+                actualPath = filePath.substring(5);
+            }
+
+            Path path = Paths.get(actualPath);
+            Path newPath = Paths.get(actualPath + ".done");
+
+            // Retry logic for Windows file locking issues
+            int retries = 3;
+            int delayMs = 500;
+            Exception lastException = null;
+
+            for (int i = 0; i < retries; i++) {
+                try {
+                    Files.move(path, newPath);
+                    System.out.println("Renamed file from " + path.getFileName() + " to " + newPath.getFileName());
+                    return; // Success
+                } catch (Exception e) {
+                    lastException = e;
+                    if (i < retries - 1) {
+                        System.out.println("Rename attempt " + (i + 1) + " failed, retrying in " + delayMs + "ms...");
+                        Thread.sleep(delayMs);
+                        delayMs *= 2; // Exponential backoff
+                    }
+                }
+            }
+
+            // All retries failed
+            if (lastException != null) {
+                System.err.println(
+                        "Failed to rename file to .done after " + retries + " attempts: " + lastException.getMessage());
+                lastException.printStackTrace();
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to rename file to .done: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
