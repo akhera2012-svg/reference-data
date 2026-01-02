@@ -22,17 +22,31 @@ public class SecurityController {
     /**
      * Get all securities or securities by ISIN if provided
      * 
-     * @param isin Optional ISIN identifier to filter by
+     * @param isin            Optional ISIN identifier to filter by
+     * @param includeInactive If true, returns all records (active and inactive).
+     *                        Default is false (active only)
      * @return List of securities in JSON format
      */
     @GetMapping
-    public ResponseEntity<List<SecurityData>> getSecurities(@RequestParam(required = false) String isin) {
+    public ResponseEntity<List<SecurityData>> getSecurities(
+            @RequestParam(required = false) String isin,
+            @RequestParam(defaultValue = "false") boolean includeInactive) {
         List<SecurityData> securities;
 
-        if (isin != null && !isin.isEmpty()) {
-            securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
+        if (includeInactive) {
+            // Return all records
+            if (isin != null && !isin.isEmpty()) {
+                securities = securityRepository.findByIsin(isin);
+            } else {
+                securities = securityRepository.findAll();
+            }
         } else {
-            securities = securityRepository.findByToDate(ETERNITY);
+            // Return active records only (default)
+            if (isin != null && !isin.isEmpty()) {
+                securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
+            } else {
+                securities = securityRepository.findByToDate(ETERNITY);
+            }
         }
 
         if (securities.isEmpty()) {
@@ -58,12 +72,22 @@ public class SecurityController {
     /**
      * Get all securities with a specific ISIN
      * 
-     * @param isin The ISIN identifier
+     * @param isin            The ISIN identifier
+     * @param includeInactive If true, returns all records (active and inactive).
+     *                        Default is false (active only)
      * @return List of securities with matching ISIN
      */
     @GetMapping("/isin/{isin}")
-    public ResponseEntity<List<SecurityData>> getSecuritiesByIsin(@PathVariable String isin) {
-        List<SecurityData> securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
+    public ResponseEntity<List<SecurityData>> getSecuritiesByIsin(
+            @PathVariable String isin,
+            @RequestParam(defaultValue = "false") boolean includeInactive) {
+        List<SecurityData> securities;
+
+        if (includeInactive) {
+            securities = securityRepository.findByIsin(isin);
+        } else {
+            securities = securityRepository.findByIsinAndToDate(isin, ETERNITY);
+        }
 
         if (securities.isEmpty()) {
             return ResponseEntity.noContent().build();
