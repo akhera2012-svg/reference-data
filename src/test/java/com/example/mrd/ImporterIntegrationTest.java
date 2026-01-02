@@ -22,7 +22,7 @@ public class ImporterIntegrationTest {
     @Test
     void importCsv_and_deduplicateByIsin() {
         repo.deleteAll();
-        importer.importCsv("classpath:test-securities.csv");
+        importer.importCsv("classpath:test-securities-1.csv");
 
         List<?> isin123 = repo.findByIsin("ISIN123");
         assertThat(isin123.size()).isEqualTo(2);
@@ -32,10 +32,25 @@ public class ImporterIntegrationTest {
 
         long total = repo.count();
         assertThat(total).isEqualTo(3);
+
+        importer.importCsv("classpath:test-securities-2.csv");
+
+        isin123 = repo.findByIsin("ISIN123");
+        assertThat(isin123.size()).isEqualTo(3);
+
+        isin456 = repo.findByIsin("ISIN456");
+        assertThat(isin456.size()).isEqualTo(2);
+
+        List<?> isin457 = repo.findByIsin("ISIN457");
+        assertThat(isin457.size()).isEqualTo(1);
     }
 
     @Test
     void deleteRepo() {
+
         repo.deleteAll();
+        List<?> recordList = repo.findAll();
+        assertThat(recordList.size()).isEqualTo(0);
+
     }
 }
