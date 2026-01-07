@@ -11,11 +11,12 @@ import java.nio.file.*;
 @Component
 public class CsvDirectoryWatcher {
 
-    private final CsvImporter importer;
+    private final SecurityDataImporter importer;
     private final String directoryPath;
     private WatchService watchService;
 
-    public CsvDirectoryWatcher(CsvImporter importer, @Value("${app.csv.directory.path:./data}") String directoryPath) {
+    public CsvDirectoryWatcher(SecurityDataImporter importer,
+            @Value("${app.csv.directory.path:./data}") String directoryPath) {
         this.importer = importer;
         this.directoryPath = directoryPath;
     }

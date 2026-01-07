@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Entity
@@ -20,7 +21,9 @@ public class SecurityData {
     private String cusip;
     private String isin;
     private String cins;
+    @JsonProperty("issuer_code")
     private String issuerCode;
+    @JsonProperty("issue_date")
     private LocalDate issueDate;
     private String ticker;
     private String currency;
@@ -140,5 +143,24 @@ public class SecurityData {
 
     public void setToDate(LocalDateTime toDate) {
         this.toDate = toDate;
+    }
+
+    @Override
+    public String toString() {
+        return "SecurityData{" +
+                "id=" + id +
+                ", cusip='" + cusip + '\'' +
+                ", isin='" + isin + '\'' +
+                ", cins='" + cins + '\'' +
+                ", issuerCode='" + issuerCode + '\'' +
+                ", issueDate=" + issueDate +
+                ", ticker='" + ticker + '\'' +
+                ", currency='" + currency + '\'' +
+                ", country='" + country + '\'' +
+                ", securityDesc='" + securityDesc + '\'' +
+                ", securityType='" + securityType + '\'' +
+                ", fromDate=" + fromDate +
+                ", toDate=" + toDate +
+                '}';
     }
 }

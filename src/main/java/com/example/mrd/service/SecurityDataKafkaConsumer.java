@@ -18,10 +18,10 @@ import java.util.UUID;
 @Service
 public class SecurityDataKafkaConsumer {
 
-    private final CsvImporter csvImporter;
+    private final SecurityDataImporter csvImporter;
     private final String csvDirectoryPath;
 
-    public SecurityDataKafkaConsumer(CsvImporter csvImporter,
+    public SecurityDataKafkaConsumer(SecurityDataImporter csvImporter,
             @Value("${app.csv.directory.path:./data}") String csvDirectoryPath) {
         this.csvImporter = csvImporter;
         this.csvDirectoryPath = csvDirectoryPath;

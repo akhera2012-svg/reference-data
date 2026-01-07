@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class CsvImporter {
+public class SecurityDataImporter {
 
     private final SecurityRepository repository;
     private final ResourceLoader resourceLoader;
@@ -32,7 +32,7 @@ public class CsvImporter {
             DateTimeFormatter.ofPattern("yyyy-MM-dd")
     };
 
-    public CsvImporter(SecurityRepository repository, ResourceLoader resourceLoader) {
+    public SecurityDataImporter(SecurityRepository repository, ResourceLoader resourceLoader) {
         this.repository = repository;
         this.resourceLoader = resourceLoader;
     }

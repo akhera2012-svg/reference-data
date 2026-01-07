@@ -407,6 +407,7 @@
                             <th>Ticker</th>
                             <th>Currency</th>
                             <th>Country</th>
+                            <th>Issuer Code</th>
                             <th>Issue Date</th>
                             <th>Security Type</th>
                             <th>Description</th>
@@ -510,8 +511,10 @@
                     '<tr><td colspan="11" class="text-center text-muted py-5">No records found</td></tr>';
                 return;
             }
-
             const tbody = document.getElementById('recordsTableBody');
+            records.forEach(record => {
+                document.writeln(record);
+            });
             tbody.innerHTML = records.map((record, index) => {
                 const isActive = record.toDate && new Date(record.toDate).getFullYear() === 9999;
                 const statusBadge = isActive
@@ -527,6 +530,7 @@
                         <td>${record.ticker || '-'}</td>
                         <td>${record.currency || '-'}</td>
                         <td>${record.country || '-'}</td>
+                        <td>${record.issuerCode || '-'}</td>
                         <td>${formatDate(record.issueDate) || '-'}</td>
                         <td>${record.securityType || '-'}</td>
                         <td title="${record.securityDesc || ''}" class="text-truncate-custom">${record.securityDesc || '-'}</td>

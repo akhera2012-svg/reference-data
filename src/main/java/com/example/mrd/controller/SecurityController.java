@@ -77,6 +77,8 @@ public class SecurityController {
         List<SecurityData> securities = securityRepository.findAll(
                 SecuritySpecification.filterByCriteria(filters, includeInactive));
 
+        // securities.forEach(System.out::println);
+
         if (securities.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
