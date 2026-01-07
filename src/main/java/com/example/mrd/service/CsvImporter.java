@@ -38,6 +38,53 @@ public class CsvImporter {
     }
 
     @Transactional
+    public void importSecurityData(SecurityData securityData) {
+        if (securityData == null) {
+            return;
+        }
+
+        String isin = securityData.getIsin();
+
+        if (isin == null || isin.isBlank()) {
+            // no identifier, always insert with timestamps
+            securityData.setFromDate(LocalDateTime.now());
+            securityData.setToDate(LocalDateTime.of(9999, 12, 31, 23, 59, 59));
+            repository.save(securityData);
+            return;
+        }
+
+        List<SecurityData> existing = repository.findByIsin(isin);
+        boolean hasExact = false;
+        for (SecurityData ex : existing) {
+            if (nonIdentifierFieldsEqual(ex, securityData)) {
+                hasExact = true;
+                break;
+            }
+        }
+
+        if (!hasExact) {
+            // New record with different non-identifier fields for same ISIN
+            // Close off the old active record
+            for (SecurityData ex : existing) {
+                if (ex.getToDate() != null &&
+                        ex.getToDate().equals(LocalDateTime.of(9999, 12, 31, 23, 59, 59))) {
+                    // This is the active record, close it
+                    ex.setToDate(LocalDateTime.now());
+                    repository.save(ex);
+                }
+            }
+            // Insert new row with same ISIN
+            securityData.setFromDate(LocalDateTime.now());
+            securityData.setToDate(LocalDateTime.of(9999, 12, 31, 23, 59, 59));
+            repository.save(securityData);
+            System.out.println("Imported security: " + isin);
+        } else {
+            // identical record already exists -> skip
+            System.out.println("Security record already exists: " + isin);
+        }
+    }
+
+    @Transactional
     public void importCsv(String path) {
         System.out.println("!!! Importing CSV from path: " + path);
         try {

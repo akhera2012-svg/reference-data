@@ -4,8 +4,13 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 @Entity
 @Table(name = "securities")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize(as = SecurityData.class)
 public class SecurityData {
 
     @Id
