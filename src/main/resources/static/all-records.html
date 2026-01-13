@@ -512,9 +512,9 @@
                 return;
             }
             const tbody = document.getElementById('recordsTableBody');
-            records.forEach(record => {
-                document.writeln(record);
-            });
+            // records.forEach(record => {
+            //     document.writeln(record);
+            // });
             tbody.innerHTML = records.map((record, index) => {
                 const isActive = record.toDate && new Date(record.toDate).getFullYear() === 9999;
                 const statusBadge = isActive
