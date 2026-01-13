@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class CsvImporter {
+public class SecurityDataImporter {
 
     private final SecurityRepository repository;
     private final ResourceLoader resourceLoader;
@@ -32,9 +32,56 @@ public class CsvImporter {
             DateTimeFormatter.ofPattern("yyyy-MM-dd")
     };
 
-    public CsvImporter(SecurityRepository repository, ResourceLoader resourceLoader) {
+    public SecurityDataImporter(SecurityRepository repository, ResourceLoader resourceLoader) {
         this.repository = repository;
         this.resourceLoader = resourceLoader;
+    }
+
+    @Transactional
+    public void importSecurityData(SecurityData securityData) {
+        if (securityData == null) {
+            return;
+        }
+
+        String isin = securityData.getIsin();
+
+        if (isin == null || isin.isBlank()) {
+            // no identifier, always insert with timestamps
+            securityData.setFromDate(LocalDateTime.now());
+            securityData.setToDate(LocalDateTime.of(9999, 12, 31, 23, 59, 59));
+            repository.save(securityData);
+            return;
+        }
+
+        List<SecurityData> existing = repository.findByIsin(isin);
+        boolean hasExact = false;
+        for (SecurityData ex : existing) {
+            if (nonIdentifierFieldsEqual(ex, securityData)) {
+                hasExact = true;
+                break;
+            }
+        }
+
+        if (!hasExact) {
+            // New record with different non-identifier fields for same ISIN
+            // Close off the old active record
+            for (SecurityData ex : existing) {
+                if (ex.getToDate() != null &&
+                        ex.getToDate().equals(LocalDateTime.of(9999, 12, 31, 23, 59, 59))) {
+                    // This is the active record, close it
+                    ex.setToDate(LocalDateTime.now());
+                    repository.save(ex);
+                }
+            }
+            // Insert new row with same ISIN
+            securityData.setFromDate(LocalDateTime.now());
+            securityData.setToDate(LocalDateTime.of(9999, 12, 31, 23, 59, 59));
+            repository.save(securityData);
+            System.out.println("Imported security: " + isin);
+        } else {
+            // identical record already exists -> skip
+            System.out.println("Security record already exists: " + isin);
+        }
     }
 
     @Transactional
@@ -113,7 +160,7 @@ public class CsvImporter {
             // Rename the file to .done after successful import
             // Move this outside try-with-resources to ensure file handle is released on
             // Windows
-            renameFileToProcessed(path);
+            moveFileToProcessed(path);
         } catch (Exception e) {
             System.err.println("Failed to import CSV: " + e.getMessage());
             e.printStackTrace();
@@ -204,7 +251,7 @@ public class CsvImporter {
         return null;
     }
 
-    private void renameFileToProcessed(String filePath) {
+    private void moveFileToProcessed(String filePath) {
         try {
             // Extract actual file path from "file:" prefix if present
             String actualPath = filePath;
@@ -213,7 +260,14 @@ public class CsvImporter {
             }
 
             Path path = Paths.get(actualPath);
-            Path newPath = Paths.get(actualPath + ".done");
+            Path parentDir = path.getParent();
+            Path processedDir = parentDir.resolve("processed");
+
+            if (!Files.exists(processedDir)) {
+                Files.createDirectories(processedDir);
+            }
+
+            Path newPath = processedDir.resolve(path.getFileName());
 
             // Retry logic for Windows file locking issues
             int retries = 3;
@@ -223,12 +277,12 @@ public class CsvImporter {
             for (int i = 0; i < retries; i++) {
                 try {
                     Files.move(path, newPath);
-                    System.out.println("Renamed file from " + path.getFileName() + " to " + newPath.getFileName());
+                    System.out.println("Moved file from " + path.getFileName() + " to " + newPath.toString());
                     return; // Success
                 } catch (Exception e) {
                     lastException = e;
                     if (i < retries - 1) {
-                        System.out.println("Rename attempt " + (i + 1) + " failed, retrying in " + delayMs + "ms...");
+                        System.out.println("Move attempt " + (i + 1) + " failed, retrying in " + delayMs + "ms...");
                         Thread.sleep(delayMs);
                         delayMs *= 2; // Exponential backoff
                     }
@@ -238,11 +292,12 @@ public class CsvImporter {
             // All retries failed
             if (lastException != null) {
                 System.err.println(
-                        "Failed to rename file to .done after " + retries + " attempts: " + lastException.getMessage());
+                        "Failed to move file to processed directory after " + retries + " attempts: "
+                                + lastException.getMessage());
                 lastException.printStackTrace();
             }
         } catch (Exception e) {
-            System.err.println("Failed to rename file to .done: " + e.getMessage());
+            System.err.println("Failed to move file to processed directory: " + e.getMessage());
             e.printStackTrace();
         }
     }

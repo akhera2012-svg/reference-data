@@ -1,7 +1,7 @@
 package com.example.mrd;
 
 import com.example.mrd.repository.SecurityRepository;
-import com.example.mrd.service.CsvImporter;
+import com.example.mrd.service.SecurityDataImporter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ImporterIntegrationTest {
 
     @Autowired
-    CsvImporter importer;
+    SecurityDataImporter importer;
 
     @Autowired
     SecurityRepository repo;

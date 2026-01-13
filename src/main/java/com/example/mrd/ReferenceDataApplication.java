@@ -1,6 +1,6 @@
 package com.example.mrd;
 
-import com.example.mrd.service.CsvImporter;
+import com.example.mrd.service.SecurityDataImporter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +14,7 @@ public class ReferenceDataApplication {
     }
 
     @Bean
-    CommandLineRunner runner(CsvImporter importer) {
+    CommandLineRunner runner(SecurityDataImporter importer) {
         return args -> {
             // If a file path is provided via command-line, import that single file.
             if (args != null && args.length > 0) {
