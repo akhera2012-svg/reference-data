@@ -516,6 +516,7 @@
             //     document.writeln(record);
             // });
             tbody.innerHTML = records.map((record, index) => {
+                // console.log(record);
                 const isActive = record.toDate && new Date(record.toDate).getFullYear() === 9999;
                 const statusBadge = isActive
                     ? '<span class="status-badge status-active">Active</span>'

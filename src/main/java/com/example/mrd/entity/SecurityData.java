@@ -21,9 +21,7 @@ public class SecurityData {
     private String cusip;
     private String isin;
     private String cins;
-    @JsonProperty("issuer_code")
     private String issuerCode;
-    @JsonProperty("issue_date")
     private LocalDate issueDate;
     private String ticker;
     private String currency;
